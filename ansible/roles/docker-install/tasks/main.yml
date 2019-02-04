@@ -1,0 +1,24 @@
+---
+- name: Add Docker repository key
+  apt_key:
+    url: "{{ docker_install_apt_key_url }}"
+    state: present
+
+- name: Add Docker repository and update apt cache
+  apt_repository:
+    repo: "{{ docker_install_apt_repository }}"
+    update_cache: yes
+    state: present
+
+- name: Install docker package
+  apt:
+    name: "{{ docker_install_docker_version }}"
+    state: present
+    update_cache: yes
+    cache_valid_time: 3600
+
+- name: Ensure docker service
+  systemd:
+    name: docker
+    enabled: yes
+    state: started
