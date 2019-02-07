@@ -54,7 +54,7 @@ Task is nothing more than a call to an ansible modules.
 
 The Modules can control system resources, like services, packages, or files (anything really), or handle executing system commands.
 
-All the modules have your documentation listated with `ansible-doc`
+All the modules have your documentation listed with `ansible-doc`
 
 ```bash
 $ ansible-doc {module-name}
@@ -171,7 +171,7 @@ scp_if_ssh = True
 [vm_tester]
 10.10.0.1
 ```
-Ansible accept a option to discover your inventory dynamically, but each cloud provider has your method to allow this feature.
+Ansible accept an option to discover your inventory dynamically, but each cloud provider has your method to allow this feature.
 
 
 ## Requirements
