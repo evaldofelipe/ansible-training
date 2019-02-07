@@ -1,12 +1,8 @@
 # Ansible training
 
-A basic explanation about concepts and how to create your first Ansible automation.
-
-<!-- mdtocstart -->
-
 ## Table of Contents
 
-- [Ansible introduction](#ansible-concepts)
+- [Ansible introduction](#ansible-introduction)
 - [Ansible goals](#ansible-goals)
 - [Ansible concepts](#ansible-concepts)
  - [Task & modules](#task-modules)
@@ -58,10 +54,16 @@ Task is nothing more than a call to an ansible modules.
 
 The Modules can control system resources, like services, packages, or files (anything really), or handle executing system commands.
 
-All the modules can be listated with `ansible-doc`
+All the modules have your documentation listated with `ansible-doc`
 
 ```bash
 $ ansible-doc {module-name}
+```
+
+To list all the available modules, use the flag `-l`
+
+```bash
+$ ansible-doc -l
 ```
 
 Or the web page documentation [docs.ansible.com](https://docs.ansible.com)
@@ -69,8 +71,6 @@ Or the web page documentation [docs.ansible.com](https://docs.ansible.com)
 ### Role
 
 Role is a set of tasks, for some specific objective.
-
-add folder structure playbook
 
 The example bellow install the docker.
 
@@ -100,6 +100,28 @@ The example bellow install the docker.
     enabled: yes
     state: started
 ```
+
+The Ansible define some particularites to create a role folder.
+
+```
+roles/
+   example-role/
+     tasks/
+     handlers/
+     defaults/
+     vars/
+     files/
+     templates/
+     meta/
+```
+
+- `tasks` - contains the main list of tasks to be executed by the role.
+- `handlers` - contains handlers, which may be used by this role or even anywhere outside this role.
+- `defaults` - default variables for the role.
+- `vars` - other variables for the role.
+- `files` - contains files which can be deployed via this role.
+- `templates` - contains templates which can be deployed via this role.
+- `meta` - defines some meta data for this role. See below for more details.
 
 The community have a repository to create and share your roles, that can be listated with `ansible-galaxy`
 
@@ -152,21 +174,6 @@ scp_if_ssh = True
 Ansible accept a option to discover your inventory dynamically, but each cloud provider has your method to allow this feature.
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 ## Requirements
 
 * [Docker](https://docs.docker.com/engine/installation/)
@@ -211,6 +218,7 @@ Check the temporary IP generated from terraform output and create the `hosts` fi
 [vm_tester]
 your.vm.ip.here
 ```
+TIP: if your first `terraform-apply` don't output the ip address, run the command again to receive the information.
 
 ### ansible.cfg
 
