@@ -26,7 +26,7 @@ variable "prefix" {
 
 variable "tmp_env" {
   description = "Default name for builder environment"
-  default     = "tmp"
+  default     = "env"
 }
 
 variable "tmp_resource_group_name" {
@@ -62,11 +62,6 @@ variable "tmp_user" {
 variable "tmp_vm_size" {
   description = "Azure vm size"
   default     = "Standard_A0"
-}
-
-variable "vhd_url" {
-  description = "VHD url created by packer"
-  default     = ""
 }
 
 variable "image_publisher" {

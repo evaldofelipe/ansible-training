@@ -95,7 +95,7 @@ resource "azurerm_virtual_machine" "tmp_vm" {
     disable_password_authentication = true
 
     ssh_keys {
-      path     = "/home/${var.tmp_user}/.ssh/authorized_keys"
+      path     = "/home/${var.prefix}-${var.tmp_user}/.ssh/authorized_keys"
       key_data = "${file("~/.ssh/id_rsa.pub")}"
     }
   }
