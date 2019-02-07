@@ -11,7 +11,7 @@ terraform {
 #Create resource group
 
 resource "azurerm_resource_group" "tmp_rg" {
-  name     = "${var.tmp_resource_group_name}"
+  name     = "${var.prefix}-${var.tmp_resource_group_name}"
   location = "${var.location}"
 }
 
@@ -45,12 +45,12 @@ resource "azurerm_public_ip" "tmp_public_ip" {
 # Provisioning eth (w/ public IP)
 
 resource "azurerm_network_interface" "tmp_nic" {
-  name                = "${var.tmp_nic_name}"
+  name                = "${var.prefix}-${var.tmp_nic_name}"
   location            = "${var.location}"
   resource_group_name = "${azurerm_resource_group.tmp_rg.name}"
 
   ip_configuration {
-    name                          = "nic-config"
+    name                          = "${var.prefix}-nic-config"
     subnet_id                     = "${azurerm_subnet.tmp_subnet.id}"
     private_ip_address_allocation = "dynamic"
     public_ip_address_id          = "${azurerm_public_ip.tmp_public_ip.id}"
@@ -86,7 +86,7 @@ resource "azurerm_virtual_machine" "tmp_vm" {
   }
 
   os_profile {
-    admin_username = "${var.tmp_user}"
+    admin_username = "${var.prefix}-${var.tmp_user}"
     admin_password = ""
     computer_name  = "${var.prefix}-vm"
   }
@@ -99,4 +99,13 @@ resource "azurerm_virtual_machine" "tmp_vm" {
       key_data = "${file("~/.ssh/id_rsa.pub")}"
     }
   }
+}
+
+output "public_ip_id" {
+  description = "id of the public ip address provisoned."
+  value       = "${azurerm_public_ip.tmp_public_ip.*.id}"
+}
+output "public_ip_address" {
+  description = "The actual ip address allocated for the resource."
+  value       = "${azurerm_public_ip.tmp_public_ip.*.ip_address}"
 }

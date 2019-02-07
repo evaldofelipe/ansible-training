@@ -1,9 +1,0 @@
----
-- name: Main playbook
-  become: yes
-  gather_facts: no
-  hosts: vm_tester
-
-  roles:
-    - { role: docker-install, tags: docker }
-    - { role: nginx-unit, tags: nginx-unit }

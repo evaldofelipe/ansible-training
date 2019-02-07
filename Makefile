@@ -1,7 +1,6 @@
 .DEFAULT_GOAL := help
 
-inventory ?= environments/$(env)
-provider-dir = providers/azure/$(env)
+inventory ?= environments/hosts
 provider-state-backend-dir = providers/azure-state-backend/$(env)
 tags ?= all
 user ?= $(shell whoami)
@@ -37,7 +36,7 @@ ansible-docker-run = $(base-docker-run) \
 
 terraform-docker-run = $(base-docker-run) \
 	-v $(HOME)/.ssh/id_rsa.pub:/root/.ssh/id_rsa.pub:ro \
-	-w  /docker-env/terraform/$(provider-dir) \
+	-w  /docker-env/terraform/ \
 	-it docker-env
 
 guard-%:
@@ -47,7 +46,7 @@ guard-%:
 	fi
 
 .PHONY: ansible-playbook
-ansible-playbook: guard-env ## Execute Ansible playbooks
+ansible-playbook: ## Execute Ansible playbooks
 	$(ansible-docker-run) \
 		ansible-playbook $(playbook).yml \
 			-c ssh \
@@ -56,6 +55,7 @@ ansible-playbook: guard-env ## Execute Ansible playbooks
 			-t $(tags) \
 			-u $(user) \
 			$(ansible-args)
+			-vvv
 
 .PHONY: ansible-edit-vault
 ansible-edit-vault: guard-vault ## Edit Ansible vault file
@@ -86,7 +86,7 @@ help: ## Show help
 		done
 
 .PHONY: terraform-apply
-terraform-apply: guard-env ## Apply Terraform providers
+terraform-apply: ## Apply Terraform providers
 	$(terraform-docker-run) \
 		terraform apply \
 			-auto-approve=false \
@@ -95,7 +95,7 @@ terraform-apply: guard-env ## Apply Terraform providers
 			.
 
 .PHONY: terraform-destroy
-terraform-destroy: guard-env ## Destroy Terraform providers
+terraform-destroy: ## Destroy Terraform providers
 	$(terraform-docker-run) \
 		terraform destroy \
 		-parallelism=100 \
@@ -103,16 +103,9 @@ terraform-destroy: guard-env ## Destroy Terraform providers
 		.
 
 .PHONY: terraform-init
-terraform-init: guard-env ## Initialize Terraform providers
+terraform-init:  ## Initialize Terraform providers
 	$(terraform-docker-run) \
 		terraform init \
-			.
-
-.PHONY: terraform-plan
-terraform-plan: guard-env ## Show differences between real infrastructure and Terraform configurations
-	$(terraform-docker-run) \
-		terraform plan \
-			$(terraform-args) \
 			.
 
 .PHONY: setup

@@ -56,7 +56,7 @@ variable "tmp_vm_name" {
 
 variable "tmp_user" {
   description = "user for tmp vm"
-  default     = "packer"
+  default     = "tmp"
 }
 
 variable "tmp_vm_size" {

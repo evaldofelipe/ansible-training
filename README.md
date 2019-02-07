@@ -9,12 +9,13 @@ A basic explanation about concepts and how to create your first Ansible automati
 - [Ansible introduction](#ansible-concepts)
 - [Ansible goals](#ansible-goals)
 - [Ansible concepts](#ansible-concepts)
- - [Task & modules](#task-&-modules)
+ - [Task & modules](#task-modules)
  - [Role](#role)
  - [Playbook](#playbook)
  - [Workflow](#workflow)
 - [Requirements](#requirements)
 - [Getting started](#getting-started)
+- [Create Ansible files](#create-ansible-files)
 
 <!-- mdtocend -->
 
@@ -68,6 +69,8 @@ Or the web page documentation [docs.ansible.com](https://docs.ansible.com)
 ### Role
 
 Role is a set of tasks, for some specific objective.
+
+add folder structure playbook
 
 The example bellow install the docker.
 
@@ -188,4 +191,145 @@ Setup the docker image with [Ansible](https://www.ansible.com/) and [Terraform](
 
 ```bash
 $ make setup
+```
+
+### Create a virtual machine
+
+Use terraform to deploy a temporary VM to configure with Ansible.
+
+```bash
+$ make terraform-init
+$ make terraform-apply
+```
+
+## Create Ansible files
+
+### hosts
+Check the temporary IP generated from terraform output and create the `hosts` file on path `ansible/environments/hosts`
+
+```
+[vm_tester]
+your.vm.ip.here
+```
+
+### ansible.cfg
+
+Create a `ansible.cfg` file on path `ansible/ansible.cfg` to define basics parameters for Ansible.
+
+```
+[defaults]
+host_key_checking = False
+
+[ssh_connection]
+scp_if_ssh = True
+```
+
+### Create a playbook
+
+To execute the example role on the project, you need create a playbook file `main-playbook.yml` on path `ansible/main-playbook.yml`
+
+```yml
+---
+- name: Main playbook
+  become: yes
+  gather_facts: no
+  hosts: vm_tester
+
+  roles:
+    - { role: docker-install, tags: docker }
+```
+This role ensure the docker was instaled and running on VM.
+
+### Execute the playbook
+
+The file `Makefile` have a target to execute the Ansible inside the container
+
+```bash
+$ make ansible-playbook playbook=main-playbook tags=docker user=tmp
+```
+
+### Check the VM
+
+Connect via ssh on the machine and verify the docker status
+
+### Create a role
+
+As a demo for this project, you'll create a role to run a container with nginx, using a unit. Exists a previous role created to install the docker on VM.
+
+Create a role paths.
+
+```bash
+mkdir -p ansible/roles/nginx-unit/{tasks,templates}
+```
+
+### tasks
+
+Your tasks file will copy the unit to specific unit folder and ensure the execution of the new unit.
+
+Create the file `main.yml` on path `ansible/roles/nginx-unit/tasks/main.yml`
+
+```yml
+---
+- name: Copy systemd services
+  template:
+    src: "etc/systemd/system/{{ item }}.j2"
+    dest: "/etc/systemd/system/{{ item }}"
+    owner: root
+  register: systemd
+  with_items:
+    - nginx-tmp.service
+
+- name: Ensure systemd service
+  systemd:
+    name: "{{ item.item }}"
+    daemon_reload: yes
+    enabled: yes
+    state: "{{ (item.changed) | ternary('restarted', 'started') }}"
+  with_items: "{{ systemd.results }}"
+
+```
+### Unit file
+
+For best manage of the resource, this project use a unit file to deploy the service.
+
+Create the unit file called `nginx-tmp.service.j2` on path `ansible/roles/nginx-unit/templates/etc/systemd/system/nginx-tmp.service.j2`
+
+```
+[Unit]
+Description=nginx-test container
+After=docker.service
+
+[Service]
+TimeoutStartSec=0
+Restart=always
+ExecStartPre=-/usr/bin/docker kill nginx
+ExecStartPre=-/usr/bin/docker rm nginx
+ExecStartPre=-/usr/bin/docker pull "nginx"
+ExecStart=/usr/bin/docker run --rm --name nginx-test -p 80:80 nginx
+ExecStop=/usr/bin/docker stop nginx-test
+
+[Install]
+WantedBy=multi-user.target
+```
+
+### Add new role
+
+After create the role, add them to your `main-playbook.yml`
+
+```yml
+- { role: nginx-unit, tags: nginx-unit }
+```
+
+### Execute new role
+
+Run the ansible-playbook target again, with the tag for a new role
+
+```bash
+$ make ansible-playbook playbook=main-playbook tags=nginx user=tmp
+```
+
+Check your service status
+
+```bash
+$ curl [your_output_ip]
 ```
