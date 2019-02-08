@@ -1,6 +1,6 @@
 .DEFAULT_GOAL := help
 
-inventory ?= environments/hosts
+inventory ?= environments/$(env)
 provider-state-backend-dir = providers/azure-state-backend/$(env)
 tags ?= all
 user ?= $(shell whoami)
@@ -46,7 +46,7 @@ guard-%:
 	fi
 
 .PHONY: ansible-playbook
-ansible-playbook: ## Execute Ansible playbooks
+ansible-playbook: guard-env guard-playbook ## Execute Ansible playbooks
 	$(ansible-docker-run) \
 		ansible-playbook $(playbook).yml \
 			-c ssh \
@@ -54,8 +54,9 @@ ansible-playbook: ## Execute Ansible playbooks
 			-i $(inventory) \
 			-t $(tags) \
 			-u $(user) \
+			-vvv \
 			$(ansible-args)
-			-vvv
+
 
 .PHONY: ansible-edit-vault
 ansible-edit-vault: guard-vault ## Edit Ansible vault file
