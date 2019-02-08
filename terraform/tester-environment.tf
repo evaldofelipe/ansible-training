@@ -60,7 +60,7 @@ resource "azurerm_network_interface" "tmp_nic" {
 # Create virutal machine
 
 resource "azurerm_virtual_machine" "tmp_vm" {
-  name                  = "${var.prefix}-vm"
+  name                  = "${var.prefix}-${var.tmp_vm_name}"
   location              = "${var.location}"
   resource_group_name   = "${azurerm_resource_group.tmp_rg.name}"
   network_interface_ids = ["${azurerm_network_interface.tmp_nic.id}"]
