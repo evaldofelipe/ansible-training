@@ -212,7 +212,7 @@ $ make terraform-apply
 ## Create Ansible files
 
 ### hosts
-Check the temporary IP generated from terraform output and create the `hosts` file on path `ansible/environments/hosts`
+Check the temporary IP generated from terraform output and create the `hosts` file on path `ansible/environments/dev/hosts`
 
 ```
 [vm_tester]
@@ -253,7 +253,7 @@ This role ensure the docker was instaled and running on VM.
 The file `Makefile` have a target to execute the Ansible inside the container
 
 ```bash
-$ make ansible-playbook playbook=main-playbook tags=docker user=tmp
+$ make ansible-playbook playbook=main-playbook env=dev tags=docker user=tmp
 ```
 
 ### Check the VM
@@ -340,4 +340,61 @@ Check your service status
 
 ```bash
 $ curl [your_output_ip]
+```
+### Protect your sensitive information with vault
+
+Vault is a extension of Ansible to encrypt and decrypt passwords, keys, or whathaver you want protect on your project.
+
+On this example you'll protect a simple command as a variable.
+
+On role template file `ansible/roles/nginx-unit/templates/etc/systemd/system/nginx-tmp.service.j2` edit the lines where are the `ExecStart` and `ExecStop` commands
+
+```bash
+ExecStart={{ nginx_start_command }}
+ExecStop={{ nginx_stop_command }}
+```
+Create the `default` folder for store this variables, on path `ansible/roles/nginx-unit/defaults`
+
+```bash
+$ mkdir -p ansible/roles/nginx-unit/default
+```
+
+
+Create the file `main.yml` on path `ansible/roles/nginx-unit/defaults/main.yml`
+
+```yml
+---
+nginx_start_command: "/usr/bin/docker run --rm --name nginx-test -p 80:80 nginx"
+nginx_stop_command:  "/usr/bin/docker stop nginx-test"
+
+```
+Generate a password to use on encrypt proccess
+
+```bash
+$ openssl rand -base64 10
+```
+Encrypt the variable file that you created
+
+```bash
+ansible-vault encrypt ansible/roles/nginx-unit/defaults/main.yml
+```
+
+Save the password on a file for Ansible use
+
+```bash
+$ echo [your.password.here] > ansible/vault_password_file
+```
+
+Add to your file `ansible/ansible.cfg` the path to your vault file
+
+```bash
+[defaults]
+host_key_checking = False
+vault_password_file = ./vault_password_file
+```
+
+Now, to test all the process, execute all the roles together and the return need to be 0
+
+```bash
+$ make ansible-playbook playbook=main-playbook env=dev tags=all user=tmp
 ```
