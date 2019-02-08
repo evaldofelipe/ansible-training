@@ -393,7 +393,7 @@ host_key_checking = False
 vault_password_file = ./vault_password_file
 ```
 
-Now, to test all the process, execute all the roles together and the return need to be 0
+Now, to test all the process, execute all the roles together and the return need to be `changed=0    unreachable=0    failed=0`
 
 ```bash
 $ make ansible-playbook playbook=main-playbook env=dev tags=all user=tmp
