@@ -398,3 +398,11 @@ Now, to test all the process, execute all the roles together and the return need
 ```bash
 $ make ansible-playbook playbook=main-playbook env=dev tags=all user=tmp
 ```
+
+### Destroy your test infrastructure
+
+After all the tests, destroy all resources with terraform
+
+```bash
+$ terraform destroy
+```
