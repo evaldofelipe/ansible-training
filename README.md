@@ -152,7 +152,7 @@ The file where Ansible *"get things done"*. Here you define your hosts, the role
 
 This gif ilustrate a basic workflow
 
-![alt text](https://media.giphy.com/media/9D5gzWJUcrIYGYsxUm/giphy.gif)
+![alt text](https://media.giphy.com/media/QvpxnuyWxauRIFcCAw/giphy.gif)
 
 The file `ansible.cfg` is where you can set a bunch of parameters to ansible while running
 
